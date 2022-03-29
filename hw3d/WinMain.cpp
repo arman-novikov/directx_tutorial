@@ -1,5 +1,5 @@
 #include "Window.h"
-
+#include "WStringConvert.h"
 
 int CALLBACK WinMain(
 	HINSTANCE hInstance,
@@ -7,24 +7,42 @@ int CALLBACK WinMain(
 	LPSTR     lpCmdLine,
 	int       nCmdShow)
 {
-	Window wnd(800, 300, L"Donkey Fart Box");
-	Window wnd_chebur(800, 300, L"Cheburek");
-
-	MSG msg;
-	BOOL gResult;
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+	try
 	{
-		// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
+		Window wnd(800, 300, L"Donkey Fart Box");
 
-	// check if GetMessage call itself worked
-	if (gResult == -1)
+		MSG msg;
+		BOOL gResult;
+		while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+		{
+			// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// check if GetMessage call itself borked
+		if (gResult == -1)
+		{
+			throw CHWND_LAST_EXCEPT();
+		}
+
+		// wParam here is the value passed to PostQuitMessage
+		return msg.wParam;
+	}
+	catch (const CustomException& e)
 	{
-		return -1;
+		const auto what = wstring_convert::to_wstring(e.what());
+		const auto type = wstring_convert::to_wstring(e.GetType());
+		MessageBox(nullptr, what.c_str(), type.c_str(), MB_OK | MB_ICONEXCLAMATION);
 	}
-
-	// wParam here is the value passed to PostQuitMessage
-	return msg.wParam;
+	catch (const std::exception& e)
+	{
+		const auto what = wstring_convert::to_wstring(e.what());
+		MessageBox(nullptr, what.c_str(), L"Standard Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	catch (...)
+	{
+		MessageBox(nullptr, L"No details available", L"Unknown Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	return -1;
 }

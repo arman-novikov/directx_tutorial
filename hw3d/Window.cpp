@@ -1,6 +1,9 @@
 #include "Window.h"
 
+#include "WStringConvert.h"
+
 #include <string>
+#include <sstream>
 
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -98,4 +101,59 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+
+Window::Exception::Exception(int line, const char* file, HRESULT hr) noexcept
+	:
+	CustomException(line, file),
+	hr(hr)
+{}
+
+const char* Window::Exception::what() const noexcept
+{
+	std::stringstream oss;
+	oss << GetType() << std::endl
+		<< "[Error Code] " << GetErrorCode() << std::endl
+		<< "[Description] " << wstring_convert::to_string(GetErrorString()) << std::endl
+		<< GetOriginString();
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+const char* Window::Exception::GetType() const noexcept
+{
+	return "Custom Window Exception";
+}
+
+std::wstring Window::Exception::TranslateErrorCode(HRESULT hr) noexcept
+{
+	wchar_t* pMsgBuf = nullptr;
+	// windows will allocate memory for err string and make our pointer point to it
+	DWORD nMsgLen = FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPWSTR>(&pMsgBuf), 0, nullptr
+	);
+	// 0 string length returned indicates a failure
+	if (nMsgLen == 0)
+	{
+		return L"Unidentified error code";
+	}
+	// copy error string from windows-allocated buffer to std::string
+	std::wstring errorString = pMsgBuf;
+	// free windows buffer
+	LocalFree(pMsgBuf);
+	return errorString;
+}
+
+HRESULT Window::Exception::GetErrorCode() const noexcept
+{
+	return hr;
+}
+
+std::wstring Window::Exception::GetErrorString() const noexcept
+{
+	return TranslateErrorCode(hr);
 }
