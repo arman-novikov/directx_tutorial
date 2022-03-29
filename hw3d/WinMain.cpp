@@ -1,5 +1,10 @@
 #include <Windows.h>
 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
 int CALLBACK WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
@@ -10,7 +15,7 @@ int CALLBACK WinMain(
     WNDCLASSEX wc{};
     wc.cbSize = sizeof(wc);
     wc.style = CS_OWNDC;
-    wc.lpfnWndProc = DefWindowProc;
+    wc.lpfnWndProc = WndProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = hInstance;
@@ -28,6 +33,12 @@ int CALLBACK WinMain(
         nullptr, nullptr, hInstance, nullptr
     );
     ShowWindow(hWind, SW_SHOW);
-    while(true);
+
+    MSG msg;
+    while (GetMessage(&msg, nullptr, 0, 0) > 0)
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
     return 0;
 }
