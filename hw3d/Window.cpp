@@ -43,7 +43,7 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
 }
 
 
-Window::Window(int width, int height, const wchar_t* name)
+Window::Window(int width, int height, const wchar_t* name) noexcept
 {
 	// calculate window size based on desired client region size
 	RECT wr;
@@ -53,7 +53,9 @@ Window::Window(int width, int height, const wchar_t* name)
 	wr.bottom = height + wr.top;
 	AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
 	
-	throw CHWND_EXCEPT(ERROR_ARENA_TRASHED);
+	//throw CHWND_EXCEPT(ERROR_ARENA_TRASHED);
+	//throw std::runtime_error("lol kek cheburek");
+	//throw 666;
 
 	hWnd = CreateWindow(
 		WindowClass::GetName(), name,
