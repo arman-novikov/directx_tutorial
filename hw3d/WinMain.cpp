@@ -2,6 +2,12 @@
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    switch (msg)
+    {
+    case WM_CLOSE:
+        PostQuitMessage(69);
+        break;
+    }
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
@@ -35,10 +41,19 @@ int CALLBACK WinMain(
     ShowWindow(hWind, SW_SHOW);
 
     MSG msg;
-    while (GetMessage(&msg, nullptr, 0, 0) > 0)
+    BOOL gres;
+    while ((gres = GetMessage(&msg, nullptr, 0, 0)) > 0)
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    return 0;
+
+    if (gres == -1)
+    {
+        return gres;
+    }
+    else
+    {
+        return msg.wParam;
+    }
 }
