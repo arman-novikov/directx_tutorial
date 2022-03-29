@@ -1,5 +1,8 @@
 #include <Windows.h>
 
+#include <string>
+#include <sstream>
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
@@ -19,7 +22,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             SetWindowText(hWnd, L"Dangerfield");
             break;
         }
+
+    case WM_CHAR:
+        {
+            static std::wstring buf;
+            buf.push_back(wParam);
+            SetWindowText(hWnd, buf.c_str());
+        }
+        break;
+    case WM_LBUTTONDOWN:
+        {
+            POINTS pt = MAKEPOINTS(lParam);
+            std::wstringstream wss;
+            wss << L"(" << pt.x << L", " << pt.y << L")";
+            SetWindowText(hWnd, wss.str().c_str());
+        }
     }
+    
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
