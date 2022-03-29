@@ -1,0 +1,1 @@
+project properties -> Linker -> System -> SubSystem = Windows
