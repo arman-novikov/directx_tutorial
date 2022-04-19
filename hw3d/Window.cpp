@@ -19,13 +19,13 @@ Window::WindowClass::WindowClass() noexcept
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = GetInstance();
-	const auto hIconImg = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON_1), IMAGE_ICON, 32, 32, 0);
+	const auto hIconImg = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 32, 32, 0);
 	wc.hIcon = static_cast<HICON>(hIconImg);
 	wc.hCursor = nullptr;
 	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = GetName();
-	const auto hIconSmImg = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON_1), IMAGE_ICON, 16, 16, 0);
+	const auto hIconSmImg = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, 0);
 	wc.hIconSm = static_cast<HICON>(hIconSmImg);
 	RegisterClassEx(&wc);
 }
@@ -55,7 +55,7 @@ Window::Window(int width, int height, const wchar_t* name) noexcept
 	wr.top = 100;
 	wr.bottom = height + wr.top;
 	AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
-	
+
 	//throw CHWND_EXCEPT(ERROR_ARENA_TRASHED);
 	//throw std::runtime_error("lol kek cheburek");
 	//throw 666;

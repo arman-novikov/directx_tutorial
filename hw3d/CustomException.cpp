@@ -5,8 +5,8 @@
 
 CustomException::CustomException(int line, const char* file) noexcept
 	:
-	line{line},
-	file{file}
+	line{ line },
+	file{ file }
 {}
 
 const char* CustomException::what() const noexcept

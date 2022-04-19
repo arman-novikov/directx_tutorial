@@ -18,4 +18,3 @@ private:
 protected:
 	mutable std::string whatBuffer;
 };
-
