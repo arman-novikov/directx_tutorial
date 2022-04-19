@@ -2,6 +2,7 @@
 
 #include "Windows.h"
 #include "CustomException.h"
+#include "Keyboard.h"
 
 class Window
 {
@@ -39,11 +40,11 @@ public:
 	~Window();
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;
+	Keyboard kbd;
 private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	static LRESULT CALLBACK HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-private:
 	HWND hWnd;
 };
 
