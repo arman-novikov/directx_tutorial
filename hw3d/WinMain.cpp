@@ -10,28 +10,13 @@ int CALLBACK WinMain(
 	try
 	{
 		Window wnd(800, 300, L"Donkey Fart Box");
-
-		MSG msg;
-		BOOL gResult;
-		while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+		while (true)
 		{
-			// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-			if (wnd.kbd.KeyIsPressed(VK_SPACE))
+			if (const auto ecode = wnd.ProcessMessages())
 			{
-				MessageBox(nullptr, L"Keyboard Event", L"space is pressed", MB_OK);
+				return ecode.value();
 			}
 		}
-
-		// check if GetMessage call itself borked
-		if (gResult == -1)
-		{
-			throw CHWND_LAST_EXCEPT();
-		}
-
-		// wParam here is the value passed to PostQuitMessage
-		return msg.wParam;
 	}
 	catch (const CustomException& e)
 	{
