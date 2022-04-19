@@ -105,6 +105,25 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;
+
+	case WM_KILLFOCUS:
+		kbd.CleareState();
+		break;
+
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		if (!(lParam & 0x40000000) || kbd.AutorepeatIsEnabled())
+		{
+			kbd.OnKeyPressed(static_cast<Keyboard::code_t>(wParam));
+		}
+		break;
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		kbd.OnKeyReleased(static_cast<Keyboard::code_t>(wParam));
+		break;
+	case WM_CHAR:
+		kbd.OnChar(static_cast<char>(wParam));
+		break;
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
