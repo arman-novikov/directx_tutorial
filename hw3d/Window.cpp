@@ -93,30 +93,10 @@ std::optional<int> Window::ProcessMessages()
 	{
 		if (msg.message == WM_QUIT)
 		{
-			return { static_cast<int>(msg.wParam) };
+			return static_cast<int>(msg.wParam);
 		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-		while (!mouse.IsEmpty())
-		{
-			const auto e = mouse.Read();
-			const auto type = e.GetType();
-			std::ostringstream oss;
-			if (type == Mouse::Event::Type::Move)
-			{
-				oss << "Mouse Position: (" << e.GetPosX() << "," << e.GetPosY();
-			}
-			else if (type == Mouse::Event::Type::WheelUp)
-			{
-				oss << "UP";
-			}
-			else if (type == Mouse::Event::Type::WheelDown)
-			{
-				oss << "DOWN";
-			}
-			const auto casted = wstring_convert::to_wstring(oss.str());
-			SetTitle(casted);
-		}
 	}
 	return {};
 }

@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "App.h"
 #include "WStringConvert.h"
 
 int CALLBACK WinMain(
@@ -9,14 +9,7 @@ int CALLBACK WinMain(
 {
 	try
 	{
-		Window wnd(800, 300, L"Donkey Fart Box");
-		while (true)
-		{
-			if (const auto ecode = wnd.ProcessMessages())
-			{
-				return ecode.value();
-			}
-		}
+		return App{}.Go();
 	}
 	catch (const CustomException& e)
 	{
