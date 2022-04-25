@@ -4,7 +4,9 @@
 #include "CustomException.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Graphics.h"
 
+#include <memory>
 #include <optional>
 
 class Window
@@ -44,6 +46,7 @@ public:
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;
 	void SetTitle(const std::wstring_view title);
+	Graphics& Gfx();
 	static std::optional<int> ProcessMessages();
 private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -52,6 +55,7 @@ private:
 	HWND hWnd;
 	Keyboard kbd;
 	Mouse mouse;
+	std::unique_ptr<Graphics> pGfx;
 	int width;
 	int height;
 };
