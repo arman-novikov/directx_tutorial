@@ -1,6 +1,17 @@
 #include "Mouse.h"
 #include <Windows.h>
 
+Mouse::Mouse():
+	x{0},
+	y{0},
+	leftIsPressed{false},
+	rightIsPressed{false},
+	isInWindow{false},
+	wheelDeltaCarry{0},
+	buffer{}
+{
+}
+
 std::pair<int, int> Mouse::GetPos() const noexcept
 {
 	return { x, y };
