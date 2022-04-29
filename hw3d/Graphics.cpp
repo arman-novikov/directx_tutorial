@@ -1,5 +1,7 @@
 #include "Graphics.h"
 
+#include <stdexcept>
+
 #pragma comment(lib, "d3d11.lib")
 
 Graphics::Graphics(HWND hWnd):
@@ -25,7 +27,7 @@ Graphics::Graphics(HWND hWnd):
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	sd.Flags = 0;
 
-	D3D11CreateDeviceAndSwapChain(
+	HRESULT res = D3D11CreateDeviceAndSwapChain(
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
@@ -39,12 +41,20 @@ Graphics::Graphics(HWND hWnd):
 		nullptr,
 		&pContext
 	);
+	if (res != S_OK)
+	{
+		throw std::runtime_error("D3D11CreateDeviceAndSwapChain failed");
+	}
 	ID3D11Resource* pBackBuffer{ nullptr };
-	pSwap->GetBuffer(
+	res = pSwap->GetBuffer(
 		0u,
 		__uuidof(ID3D11Resource),
-		reinterpret_cast<void**>(pBackBuffer)
+		reinterpret_cast<void**>(&pBackBuffer)
 	);
+	if (res != S_OK)
+	{
+		throw std::runtime_error("D3D11CreateDeviceAndSwapChain failed");
+	}
 	pDevice->CreateRenderTargetView(
 		pBackBuffer,
 		nullptr,
@@ -55,22 +65,14 @@ Graphics::Graphics(HWND hWnd):
 
 Graphics::~Graphics()
 {
-	if (pTarget)
+	auto releaser = [](auto p)
 	{
-		pTarget->Release();
-	}
-	if (pDevice)
-	{
-		pDevice->Release();
-	}
-	if (pSwap)
-	{
-		pSwap->Release();
-	}
-	if (pContext)
-	{
-		pContext->Release();
-	}
+		if (p) p->Release();
+	};
+	releaser(pTarget);
+	releaser(pDevice);
+	releaser(pSwap);
+	releaser(pContext);
 }
 
 void Graphics::EndFrame()
