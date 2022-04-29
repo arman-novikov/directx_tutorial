@@ -70,6 +70,7 @@ Window::Window(int width, int height, const wchar_t* name) noexcept:
 	);
 	// show window
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
+	pGfx = std::make_unique<Graphics>(hWnd);
 }
 
 Window::~Window()
@@ -83,6 +84,11 @@ void Window::SetTitle(const std::wstring_view title)
 	{
 		throw CHWND_LAST_EXCEPT();
 	}
+}
+
+Graphics& Window::Gfx()
+{
+	return *pGfx;
 }
 
 std::optional<int> Window::ProcessMessages()
