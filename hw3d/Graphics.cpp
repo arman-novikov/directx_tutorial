@@ -2,7 +2,10 @@
 
 #include <stdexcept>
 
+#include <d3dcompiler.h>
+
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "D3DCompiler.lib")
 
 Graphics::Graphics(HWND hWnd):
 	pDevice{nullptr},
@@ -57,6 +60,56 @@ Graphics::Graphics(HWND hWnd):
 void Graphics::EndFrame()
 {
 	pSwap->Present(1u, 0u);
+}
+
+void Graphics::DrawTestTriangle()
+{
+	struct Vertex
+	{
+		float x, y;
+	};
+	static const Vertex vertices[]{
+		{ 0.0f,0.5f },
+		{ 0.5f,-0.5f },
+		{ -0.5f,-0.5f },
+	};
+	static const size_t nVertices = sizeof(vertices) / sizeof(vertices[0]);
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer{nullptr};
+	D3D11_BUFFER_DESC bd{};
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.CPUAccessFlags = 0u;
+	bd.MiscFlags = 0u;
+	bd.ByteWidth = sizeof(vertices);
+	bd.StructureByteStride = sizeof(Vertex);
+	D3D11_SUBRESOURCE_DATA sd{};
+	sd.pSysMem = vertices;
+	HRESULT hr = pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer);
+	if (hr != S_OK)
+	{
+		throw std::runtime_error("failured to allocate vertex buffer");
+	}
+	const UINT stride = sizeof(Vertex);
+	pContext->IASetVertexBuffers(0u, 1u, &pVertexBuffer, &stride, 0);
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader{ nullptr };
+	Microsoft::WRL::ComPtr<ID3DBlob> pBlob{ nullptr };
+	hr = D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
+	if (hr != S_OK)
+	{
+		throw std::runtime_error("failured to read vertex blob");
+	}
+	hr = pDevice->CreateVertexShader(
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		nullptr,
+		&pVertexShader
+	);
+	if (hr != S_OK)
+	{
+		throw std::runtime_error("failured to create vertex shader");
+	}
+	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
+	pContext->Draw(static_cast<UINT>(sizeof(vertices)), 0u);
 }
 
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
