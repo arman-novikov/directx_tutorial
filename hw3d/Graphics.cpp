@@ -45,34 +45,13 @@ Graphics::Graphics(HWND hWnd):
 	{
 		throw std::runtime_error("D3D11CreateDeviceAndSwapChain failed");
 	}
-	ID3D11Resource* pBackBuffer{ nullptr };
-	res = pSwap->GetBuffer(
-		0u,
-		__uuidof(ID3D11Resource),
-		reinterpret_cast<void**>(&pBackBuffer)
-	);
+	Microsoft::WRL::ComPtr<ID3D11Resource> pBackBuffer{nullptr};
+	res = pSwap->GetBuffer( 0u, __uuidof(ID3D11Resource), &pBackBuffer);
 	if (res != S_OK)
 	{
 		throw std::runtime_error("D3D11CreateDeviceAndSwapChain failed");
 	}
-	pDevice->CreateRenderTargetView(
-		pBackBuffer,
-		nullptr,
-		&pTarget
-	);
-	pBackBuffer->Release();
-}
-
-Graphics::~Graphics()
-{
-	auto releaser = [](auto p)
-	{
-		if (p) p->Release();
-	};
-	releaser(pTarget);
-	releaser(pDevice);
-	releaser(pSwap);
-	releaser(pContext);
+	pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget);
 }
 
 void Graphics::EndFrame()
@@ -83,5 +62,5 @@ void Graphics::EndFrame()
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] { red, green, blue, 1.0f };
-	pContext->ClearRenderTargetView(pTarget, color);
+	pContext->ClearRenderTargetView(pTarget.Get(), color);
 }
