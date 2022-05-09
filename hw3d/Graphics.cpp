@@ -73,7 +73,6 @@ void Graphics::DrawTestTriangle()
 		{ 0.5f,-0.5f },
 		{ -0.5f,-0.5f },
 	};
-	static const size_t nVertices = sizeof(vertices) / sizeof(vertices[0]);
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer{nullptr};
 	D3D11_BUFFER_DESC bd{};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -89,10 +88,31 @@ void Graphics::DrawTestTriangle()
 	{
 		throw std::runtime_error("failured to allocate vertex buffer");
 	}
+
 	const UINT stride = sizeof(Vertex);
-	pContext->IASetVertexBuffers(0u, 1u, &pVertexBuffer, &stride, 0);
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader{ nullptr };
-	Microsoft::WRL::ComPtr<ID3DBlob> pBlob{ nullptr };
+	const UINT offset = 0u;
+	pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
+	
+	Microsoft::WRL::ComPtr<ID3DBlob> pBlob{};
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader{};
+	hr = D3DReadFileToBlob(L"PixelShader.cso", &pBlob);
+	if (hr != S_OK)
+	{
+		throw std::runtime_error("failured to read pixel blob");
+	}
+	hr = pDevice->CreatePixelShader(
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		nullptr,
+		&pPixelShader
+	);
+	if (hr != S_OK)
+	{
+		throw std::runtime_error("failured to create pixel shader");
+	}
+	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader{};
 	hr = D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
 	if (hr != S_OK)
 	{
@@ -109,7 +129,43 @@ void Graphics::DrawTestTriangle()
 		throw std::runtime_error("failured to create vertex shader");
 	}
 	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-	pContext->Draw(static_cast<UINT>(sizeof(vertices)), 0u);
+
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout{};
+	const D3D11_INPUT_ELEMENT_DESC ied[]
+	{
+		{
+			"Position",
+			0,
+			DXGI_FORMAT_R32G32_FLOAT,
+			0,
+			0,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0,
+		},
+	};
+	hr = pDevice->CreateInputLayout(
+		ied,
+		static_cast<UINT>(std::size(ied)),
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		&pInputLayout
+	);
+	pContext->IASetInputLayout(pInputLayout.Get());
+
+	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), nullptr);
+
+	pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	D3D11_VIEWPORT vp{};
+	vp.Width = 800;
+	vp.Height = 600;
+	vp.MinDepth = 0;
+	vp.MaxDepth = 1;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	pContext->RSSetViewports(1u, &vp);
+
+	pContext->Draw(static_cast<UINT>(std::size(vertices)), 0u);
 }
 
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept

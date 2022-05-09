@@ -2,3 +2,5 @@
 *.aps
 *.vcxproj*
 *x64*
+*.cso
+
